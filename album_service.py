@@ -1,3 +1,4 @@
+import gc
 from pathlib import Path
 
 from jmcomic import download_album
@@ -13,5 +14,6 @@ def get_album_pdf_path(jm_album_id, pdf_dir, is_pwd, opt):
     if not Path(pdf_path).exists():
         webp_folder = f"./{album.title}"
         merge_webp_to_pdf(webp_folder, pdf_path=pdf_path, is_pwd=is_pwd, password=jm_album_id)
+        gc.collect()  # 强制垃圾回收
 
     return pdf_path

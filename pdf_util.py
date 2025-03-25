@@ -28,6 +28,10 @@ def merge_webp_to_pdf(folder_path, pdf_path, is_pwd=False, password=None):
 
     # 将所有图片合并为 PDF
     images[0].save(pdf_path, save_all=True, append_images=images[1:])
+    for image in images:
+        image.close()
+    del images
+
     print(f"PDF 文件已生成：{pdf_path}")
 
     pdf_reader = PdfReader(pdf_path)
