@@ -1,5 +1,7 @@
 ## 使用方法
 
+### 直接运行
+
 1. **下载源码包并解压**，进入项目根目录
 
 2. **创建虚拟环境**：
@@ -25,3 +27,9 @@
     ```bash
     python main.py 
     ```
+
+### 使用docker
+
+```bash
+docker run -d -p 8699:8699 linglambda/jmcomic-api
+```
