@@ -42,6 +42,12 @@
 ```bash
 docker run -d --name jmcomic-api -p 8699:8699 orwellz/jmcomic-api:latest
 ```
-## 使用方法
+## API 使用方法
 
-Get /get_pdf/{jm_album_id}
+### 获取 PDF
+
+`GET /get_pdf/{jm_album_id}`
+
+**可选参数**
+
+`Get /get+pdf/{jm_album_id}?passwd=false`(如果没有参数则默认有密码)
