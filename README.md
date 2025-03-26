@@ -1,3 +1,5 @@
+本仓库基于 https://github.com/LingLambda/JMComic-Api 修改
+
 ## 使用方法(docker和直接运行二选一即可)
 
 ### 直接运行
