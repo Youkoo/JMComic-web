@@ -63,8 +63,9 @@ def get_album_pdf_path(jm_album_id, pdf_dir, is_pwd, opt):
 
         try:
             print(f"开始从 '{webp_folder_path}' 合并生成 PDF: {pdf_path}")
-            # 注意：生成 PDF 时仍使用基于 ID 的 pdf_path
-            merge_webp_to_pdf(str(webp_folder_path), pdf_path=pdf_path, is_pwd=is_pwd, password=str(jm_album_id))
+            # 根据 is_pwd 决定是否传递密码以及密码内容
+            password_to_set = str(jm_album_id) if is_pwd else None
+            merge_webp_to_pdf(str(webp_folder_path), pdf_path=pdf_path, is_pwd=is_pwd, password=password_to_set)
             print(f"成功生成 PDF: {pdf_path}")
             gc.collect()
         except Exception as e:
