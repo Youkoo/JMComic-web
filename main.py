@@ -41,6 +41,7 @@ observer.start()
 
 from flask import Flask, send_file, jsonify
 from waitress import serve
+from jmcomic.jm_exception import MissingAlbumPhotoException # 导入异常类
 
 from album_service import get_album_pdf_path
 
@@ -50,19 +51,33 @@ app = Flask(__name__)
 # 根据 jm_album_id 返回 pdf 文件
 @app.route('/get_pdf/<jm_album_id>', methods=['GET'])
 def get_pdf(jm_album_id):
-    path = get_album_pdf_path(jm_album_id, pdf_dir, pdf_pwd, opt)
-    if path is None:
+    try:
+        path = get_album_pdf_path(jm_album_id, pdf_dir, pdf_pwd, opt)
+        if path is None:
+            # 这种情况理论上在 MissingAlbumPhotoException 之前被捕获，但也保留
+            return jsonify({
+                "success": False,
+                "message": "获取 PDF 路径失败，但未找到具体漫画"
+            }), 500
+        else:
+            return send_file(
+                path,
+                as_attachment=True,
+                download_name=Path(path).name,
+                mimetype='application/pdf'
+            )
+    except MissingAlbumPhotoException as e:
+        # 捕获 jmcomic 库抛出的特定异常
         return jsonify({
             "success": False,
-            "message": "PDF 文件不存在"
+            "message": f"无法找到 ID 为 {jm_album_id} 的漫画: {e}"
+        }), 404 # 使用 404 Not Found 状态码
+    except Exception as e:
+        # 捕获其他可能的异常
+        return jsonify({
+            "success": False,
+            "message": f"处理请求时发生未知错误: {e}"
         }), 500
-    else:
-        return send_file(
-            path,
-            as_attachment=True,
-            download_name=Path(path).name,
-            mimetype='application/pdf'
-        )
 
 
 import os
@@ -71,19 +86,33 @@ import os
 # 根据 jm_album_id 获取 pdf 文件下载到本地，返回绝对路径
 @app.route('/get_pdf_path/<jm_album_id>', methods=['GET'])
 def get_pdf_path(jm_album_id):
-    path = get_album_pdf_path(jm_album_id, pdf_dir, pdf_pwd, opt)
-    abspath = (os.path.abspath(path))
-    if path is None:
+    try:
+        path = get_album_pdf_path(jm_album_id, pdf_dir, pdf_pwd, opt)
+        if path is None:
+            # 这种情况理论上在 MissingAlbumPhotoException 之前被捕获，但也保留
+            return jsonify({
+                "success": False,
+                "message": "获取 PDF 路径失败，但未找到具体漫画"
+            }), 500
+        else:
+            abspath = (os.path.abspath(path))
+            return jsonify({
+                "success": True,
+                "message": "ok",
+                "data": abspath
+            })
+    except MissingAlbumPhotoException as e:
+        # 捕获 jmcomic 库抛出的特定异常
         return jsonify({
             "success": False,
-            "message": "PDF 文件不存在"
-        }), 500
-    else:
+            "message": f"无法找到 ID 为 {jm_album_id} 的漫画: {e}"
+        }), 404 # 使用 404 Not Found 状态码
+    except Exception as e:
+        # 捕获其他可能的异常
         return jsonify({
-            "success": True,
-            "message": "ok",
-            "data": abspath
-        })
+            "success": False,
+            "message": f"处理请求时发生未知错误: {e}"
+        }), 500
 
 
 if __name__ == '__main__':
