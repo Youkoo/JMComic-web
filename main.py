@@ -1,4 +1,5 @@
 import os
+import base64
 from pathlib import Path
 
 from jmcomic import create_option_by_file
@@ -69,23 +70,34 @@ def get_pdf(jm_album_id):
         # 使用 passwd_bool 替换原来的 pdf_pwd
         path = get_album_pdf_path(jm_album_id, pdf_dir, passwd_bool, opt)
         if path is None:
-            # 这种情况理论上在 MissingAlbumPhotoException 之前被捕获，但也保留
+            # PDF 路径获取失败
             return jsonify({
                 "success": False,
-                "message": "获取 PDF 路径失败，但未找到具体漫画"
-            }), 500
+                "message": "PDF 文件不存在" # 根据反馈修改
+            }), 404 # 使用 404 更合适
         else:
-            return send_file(
-                path,
-                as_attachment=True,
-                download_name=Path(path).name,
-                mimetype='application/pdf'
-            )
+            # 读取 PDF 文件内容
+            with open(path, 'rb') as f:
+                pdf_data = f.read()
+            
+            # 进行 Base64 编码
+            pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+            
+            # 获取文件名
+            pdf_file_name = Path(path).name
+
+            # 返回 JSON 响应
+            return jsonify({
+                "success": True,
+                "message": "PDF 获取成功",
+                "name": pdf_file_name,
+                "data": pdf_base64
+            })
     except MissingAlbumPhotoException as e:
-        # 捕获 jmcomic 库抛出的特定异常
+        # 捕获 jmcomic 库抛出的特定异常 (漫画不存在)
         return jsonify({
             "success": False,
-            "message": f"无法找到 ID 为 {jm_album_id} 的漫画: {e}"
+            "message": "PDF 文件不存在" # 根据反馈修改
         }), 404 # 使用 404 Not Found 状态码
     except Exception as e:
         # 捕获其他可能的异常
@@ -107,23 +119,25 @@ def get_pdf_path(jm_album_id):
         # 使用 passwd_bool 替换原来的 pdf_pwd
         path = get_album_pdf_path(jm_album_id, pdf_dir, passwd_bool, opt)
         if path is None:
-            # 这种情况理论上在 MissingAlbumPhotoException 之前被捕获，但也保留
+            # PDF 路径获取失败
             return jsonify({
                 "success": False,
-                "message": "获取 PDF 路径失败，但未找到具体漫画"
-            }), 500
+                "message": "PDF 文件不存在" # 根据反馈修改
+            }), 404 # 使用 404 更合适
         else:
             abspath = os.path.abspath(path)
+            pdf_file_name = Path(path).name # 获取文件名
             return jsonify({
                 "success": True,
-                "message": "ok",
-                "data": abspath
+                "message": "PDF 获取成功", # 根据反馈修改
+                "data": abspath,
+                "name": pdf_file_name # 根据反馈添加
             })
     except MissingAlbumPhotoException as e:
-        # 捕获 jmcomic 库抛出的特定异常
+        # 捕获 jmcomic 库抛出的特定异常 (漫画不存在)
         return jsonify({
             "success": False,
-            "message": f"无法找到 ID 为 {jm_album_id} 的漫画: {e}"
+            "message": "PDF 文件不存在" # 根据反馈修改
         }), 404 # 使用 404 Not Found 状态码
     except Exception as e:
         # 捕获其他可能的异常

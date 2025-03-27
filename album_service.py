@@ -50,17 +50,23 @@ def get_album_pdf_path(jm_album_id, pdf_dir, is_pwd, opt):
     pdf_filename = f"{jm_album_id}.pdf" # 使用 ID 命名
     pdf_path = os.path.join(pdf_dir, pdf_filename)
 
-    # 总是尝试下载和生成 PDF，覆盖现有文件
-    print(f"开始处理漫画 ID: {jm_album_id}，将生成/覆盖 PDF: {pdf_path}")
+    # 步骤 2: 检查 PDF 是否已存在 (缓存命中)
+    if os.path.exists(pdf_path):
+        print(f"PDF 文件已存在 (缓存命中): {pdf_path}")
+        return pdf_path
+
+    # PDF 不存在，继续下载和生成
+    print(f"开始处理漫画 ID: {jm_album_id}，将生成 PDF: {pdf_path}")
     try:
-        # 步骤 1: 下载漫画（获取元数据和图片）
+        # 步骤 3: 下载漫画（获取元数据和图片）
+        # download_album 内部应处理图片是否已存在的问题
         album, _ = download_album(jm_album_id, option=opt)
         print(f"漫画 '{album.title}' 元数据获取/下载初步完成。")
     except Exception as e:
         print(f"错误：下载或获取漫画 {jm_album_id} 元数据失败: {e}")
-        raise
+        raise # 如果下载失败，则向上抛出异常
 
-    # 步骤 2: 生成 PDF
+    # 步骤 4: 生成 PDF
     # 清理 album.title 以匹配实际下载时创建的文件夹名称
     webp_folder_name = sanitize_filename(album.title)
     webp_folder_path = Path(webp_folder_name) # 相对于当前工作目录
