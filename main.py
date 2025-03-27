@@ -40,7 +40,7 @@ observer = Observer()
 observer.schedule(cfgFileChangeHandler(observer), path=optionFile, recursive=False)
 observer.start()
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request # 导入 request
 from waitress import serve
 
 from album_service import get_album_pdf_path
@@ -51,7 +51,12 @@ app = Flask(__name__)
 # 根据 jm_album_id 返回 pdf 文件
 @app.route('/get_pdf/<jm_album_id>', methods=['GET'])
 def get_pdf(jm_album_id):
-    path, name = get_album_pdf_path(jm_album_id, pdf_dir, pdf_pwd, opt)
+    # 获取 passwd 参数，默认为 True (启用密码)
+    passwd_str = request.args.get('passwd', 'true').lower()
+    enable_pwd = passwd_str not in ('false', '0')
+
+    # 调用更新后的 get_album_pdf_path，传递 enable_pwd
+    path, name = get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=enable_pwd)
     if path is None:
         return jsonify({
             "success": False,
@@ -74,7 +79,12 @@ import os
 # 根据 jm_album_id 获取 pdf 文件下载到本地，返回绝对路径
 @app.route('/get_pdf_path/<jm_album_id>', methods=['GET'])
 def get_pdf_path(jm_album_id):
-    path, name = get_album_pdf_path(jm_album_id, pdf_dir, pdf_pwd, opt)
+    # 获取 passwd 参数，默认为 True (启用密码)
+    passwd_str = request.args.get('passwd', 'true').lower()
+    enable_pwd = passwd_str not in ('false', '0')
+
+    # 调用更新后的 get_album_pdf_path，传递 enable_pwd
+    path, name = get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=enable_pwd)
     abspath = (os.path.abspath(path))
     if path is None:
         return jsonify({
