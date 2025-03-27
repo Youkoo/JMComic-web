@@ -1,11 +1,7 @@
 from pathlib import Path
-import logging  # 导入 logging 模块
 
 from PIL import Image
 from PyPDF2 import PdfReader, PdfWriter
-
-# 配置 PyPDF2 的日志记录器，忽略 WARNING 级别及以下的消息
-logging.getLogger("PyPDF2").setLevel(logging.ERROR)
 
 
 def merge_webp_to_pdf(folder_path, pdf_path, is_pwd=False, password=None):
