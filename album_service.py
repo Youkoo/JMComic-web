@@ -9,13 +9,20 @@ from PyPDF2.errors import DependencyError, FileNotDecryptedError # 导入特定�
 from pdf_util import merge_webp_to_pdf
 
 
-# 添加 enable_pwd 参数，默认为 True
-def get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=True):
+# 添加 enable_pwd 和 Titletype 参数
+def get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=True, Titletype=2):
     # 下载本子（只下载单文件，不需要 unpack tuple）
     album, _ = download_album(jm_album_id, option=opt)
     title = album.title
-    # 修改文件名格式为 {jm_album_id}—{title}.pdf
-    pdf_filename = f"{jm_album_id}—{title}.pdf"
+
+    # 根据 Titletype 确定文件名格式
+    if Titletype == 0:
+        pdf_filename = f"{jm_album_id}.pdf"
+    elif Titletype == 1:
+        pdf_filename = f"{title}.pdf"
+    else: # Titletype == 2 或其他值（包括默认）
+        pdf_filename = f"{jm_album_id}—{title}.pdf"
+
     pdf_path_obj = Path(pdf_dir) / pdf_filename
     pdf_path = str(pdf_path_obj) # 转换为字符串路径
 

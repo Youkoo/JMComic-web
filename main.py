@@ -54,9 +54,14 @@ def get_pdf(jm_album_id):
     # 获取 passwd 参数，默认为 True (启用密码)
     passwd_str = request.args.get('passwd', 'true').lower()
     enable_pwd = passwd_str not in ('false', '0')
+    # 获取 Titletype 参数，默认为 2
+    try:
+        titletype = int(request.args.get('Titletype', 2))
+    except ValueError:
+        titletype = 2 # 如果转换失败，使用默认值
 
-    # 调用更新后的 get_album_pdf_path，传递 enable_pwd
-    path, name = get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=enable_pwd)
+    # 调用更新后的 get_album_pdf_path，传递 enable_pwd 和 Titletype
+    path, name = get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=enable_pwd, Titletype=titletype)
     if path is None:
         return jsonify({
             "success": False,
@@ -82,9 +87,14 @@ def get_pdf_path(jm_album_id):
     # 获取 passwd 参数，默认为 True (启用密码)
     passwd_str = request.args.get('passwd', 'true').lower()
     enable_pwd = passwd_str not in ('false', '0')
+    # 获取 Titletype 参数，默认为 2
+    try:
+        titletype = int(request.args.get('Titletype', 2))
+    except ValueError:
+        titletype = 2 # 如果转换失败，使用默认值
 
-    # 调用更新后的 get_album_pdf_path，传递 enable_pwd
-    path, name = get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=enable_pwd)
+    # 调用更新后的 get_album_pdf_path，传递 enable_pwd 和 Titletype
+    path, name = get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=enable_pwd, Titletype=titletype)
     abspath = (os.path.abspath(path))
     if path is None:
         return jsonify({
