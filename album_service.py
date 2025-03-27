@@ -1,4 +1,5 @@
 import gc
+import re # 导入 re 模块
 from pathlib import Path
 import os  # 导入 os 模块
 
@@ -7,6 +8,19 @@ from jmcomic import download_album
 # from jmcomic import JmOption
 
 from pdf_util import merge_webp_to_pdf
+
+
+def sanitize_filename(filename):
+    """移除或替换 Windows/Linux 文件名中的非法字符。"""
+    # 移除 Windows 中的非法字符: < > : " / \ | ? *
+    sanitized = re.sub(r'[<>:"/\\|?*]', '_', filename)
+    # 移除开头和结尾的空白字符
+    sanitized = sanitized.strip()
+    # Windows 文件名不能以句点或空格结尾
+    sanitized = sanitized.rstrip('. ')
+    # 将多个连续的下划线替换为单个下划线
+    sanitized = re.sub(r'_+', '_', sanitized)
+    return sanitized
 
 
 def get_album_pdf_path(jm_album_id, pdf_dir, is_pwd, opt):
@@ -47,7 +61,8 @@ def get_album_pdf_path(jm_album_id, pdf_dir, is_pwd, opt):
         raise
 
     # 步骤 2: 生成 PDF
-    webp_folder_name = album.title # 图片文件夹名仍然使用 title
+    # 清理 album.title 以匹配实际下载时创建的文件夹名称
+    webp_folder_name = sanitize_filename(album.title)
     webp_folder_path = Path(webp_folder_name) # 相对于当前工作目录
 
     # 在尝试合并之前，检查源图片文件夹是否存在
