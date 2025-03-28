@@ -40,7 +40,7 @@
 提供了预构建的 Docker 镜像 `linglambda/jmcomic-api`。
 
 ```bash
-docker run -d --name jmcomic-api -p 8699:8699 orwellz/jmcomic-api:latest
+docker run -d --name jmcomic-api -p 8699:8699 orwellz/jmcomic-api:V1.1
 ```
 ## API 使用方法
 
