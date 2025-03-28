@@ -40,7 +40,7 @@ observer = Observer()
 observer.schedule(cfgFileChangeHandler(observer), path=optionFile, recursive=False)
 observer.start()
 
-from flask import Flask, jsonify, request # 导入 request
+from flask import Flask, jsonify, request, send_file # 导入 request 和 send_file
 from waitress import serve
 
 from album_service import get_album_pdf_path
@@ -59,6 +59,8 @@ def get_pdf(jm_album_id):
         titletype = int(request.args.get('Titletype', 2))
     except ValueError:
         titletype = 2 # 如果转换失败，使用默认值
+    # 获取 pdf 参数，判断是否直接输出 PDF 文件
+    output_pdf_directly = request.args.get('pdf', 'false').lower() == 'true'
 
     # 调用更新后的 get_album_pdf_path，传递 enable_pwd 和 Titletype
     path, name = get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=enable_pwd, Titletype=titletype)
@@ -66,16 +68,33 @@ def get_pdf(jm_album_id):
         return jsonify({
             "success": False,
             "message": "PDF 文件不存在"
-        }), 500
-    with open(path, "rb") as f:
-        encoded_pdf = base64.b64encode(f.read()).decode('utf-8')
+        }), 404 # 使用 404 Not Found 更合适
 
-    return jsonify({
-        "success": True,
-        "message": "PDF 获取成功",
-        "name": name,
-        "data": encoded_pdf
-    })
+    if output_pdf_directly:
+        # 直接返回 PDF 文件
+        try:
+            return send_file(path, as_attachment=True, download_name=name)
+        except Exception as e:
+            return jsonify({
+                "success": False,
+                "message": f"发送 PDF 文件时出错: {e}"
+            }), 500
+    else:
+        # 返回 Base64 编码的 PDF
+        try:
+            with open(path, "rb") as f:
+                encoded_pdf = base64.b64encode(f.read()).decode('utf-8')
+            return jsonify({
+                "success": True,
+                "message": "PDF 获取成功",
+                "name": name,
+                "data": encoded_pdf
+            })
+        except Exception as e:
+            return jsonify({
+                "success": False,
+                "message": f"读取或编码 PDF 文件时出错: {e}"
+            }), 500
 
 
 import os
