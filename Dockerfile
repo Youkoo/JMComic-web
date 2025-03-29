@@ -7,14 +7,14 @@ RUN apk update && apk add --no-cache git
 # 设置工作目录
 WORKDIR /app
 
-# 克隆指定的 Git 仓库
-RUN git clone https://github.com/FfmpegZZZ/JMComic-Api
-
 # 本地build时去掉注释
-# COPY . /app
+COPY . /app
+
+# 克隆指定的 Git 仓库
+# RUN git clone https://github.com/FfmpegZZZ/JMComic-Api
 
 # 进入克隆的目录
-WORKDIR /app/JMComic-Api
+# WORKDIR /app/JMComic-Api
 
 # 安装依赖，并且不缓存依赖包
 RUN pip install --no-cache-dir -r requirements.txt
