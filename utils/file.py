@@ -16,7 +16,7 @@ def IsJmBookExist(path, jm_album_id):
     # 检查path是否存在
     if not Path(path).exists():
         return None
-
+    # @FfmpegZZZ 这匹配有点问题啊
     # 根据本子文件夹命名规则[id]title
     # 使用正则表达式匹配[id]来判断本子是否存在
     path = Path(path)
@@ -24,5 +24,9 @@ def IsJmBookExist(path, jm_album_id):
     for item in path.iterdir():
         if item.is_dir() and pattern.match(item.name):
             # 如果是文件夹且符合规则，则返回title
-            return item.name.split(']')[1].strip()
+            # 修正：找到第一个 ']' 的位置，取其后的所有内容作为 title
+            first_bracket_index = item.name.find(']')
+            if first_bracket_index != -1:
+                return item.name[first_bracket_index + 1:].strip()
+            return None 
     return None
