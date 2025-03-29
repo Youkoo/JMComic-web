@@ -1,7 +1,7 @@
 import base64
 from pathlib import Path
 
-from jmcomic import create_option_by_file, JmApiClient, JmSearchPage, JmAlbumDetail, JmCategoryPage
+from jmcomic import create_option_by_file, JmApiClient, JmSearchPage, JmAlbumDetail, JmCategoryPage, JmModuleConfig
 from jmcomic.jm_exception import JmcomicException 
 from jmcomic.jm_config import JmMagicConstants 
 
@@ -10,11 +10,11 @@ from config import config
 cfg = config()
 host = cfg.host
 port = cfg.port
-pdf_pwd = cfg.pdf_pwd
 optionFile = cfg.option_file
 pdf_dir = cfg.pdf_dir
-# opt = JmOption.construct(cfg.jmOpt)
 
+# 将下载产物命名规则改为[id]title，利于识别
+JmModuleConfig.AFIELD_ADVICE['jmbook'] = lambda album: f'[{album.id}]{album.title}'
 opt = create_option_by_file(optionFile)
 client: JmApiClient = opt.new_jm_client() 
 
@@ -31,7 +31,6 @@ class cfgFileChangeHandler(FileSystemEventHandler):
             global opt, pdf_dir, client 
             opt = create_option_by_file(optionFile)
             client = opt.new_jm_client()
-            pdf_dir = opt.plugins.after_album[0].kwargs.get('pdf_dir', './')
             print("配置文件已更新")
 
 

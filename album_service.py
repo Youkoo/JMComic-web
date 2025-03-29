@@ -1,36 +1,23 @@
 import gc
 from pathlib import Path
 import os
-import shutil
 
 from jmcomic import download_album
 from PyPDF2 import PdfReader
 from PyPDF2.errors import DependencyError, FileNotDecryptedError 
 
-from pdf_util import merge_webp_to_pdf
+# 调用utils中封装的工具函数
+from utils.pdf import merge_webp_to_pdf
+from utils.file import IsJmBookExist
 
 def get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=True, Titletype=2):
-    album, _ = download_album(jm_album_id, option=opt)
-    title = album.title 
+    title = IsJmBookExist(opt.dir_rule.base_dir, jm_album_id)
+    if title is None:   #本子不存在
+        album, _ = download_album(jm_album_id, option=opt)
+        title = f"[{jm_album_id}]{album.name}"
+    else:
+        print(f"本子已存在: {title}, 使用已缓存文件")
 
-    default_download_dir = Path(f"./{title}") 
-    target_download_dir = Path(f"./webp/{jm_album_id}")
-
-    if default_download_dir.exists() and default_download_dir.is_dir():
-        if target_download_dir.exists():
-            try:
-                shutil.rmtree(target_download_dir)
-                print(f"已删除已存在的目标目录: {target_download_dir}")
-            except OSError as e:
-                print(f"删除旧目标目录时出错 ({e}): {target_download_dir}")
-
-        target_download_dir.parent.mkdir(parents=True, exist_ok=True)
-
-        try:
-            shutil.move(str(default_download_dir), str(target_download_dir))
-            print(f"已将图片文件夹移动到: {target_download_dir}")
-        except Exception as e:
-            print(f"移动文件夹 {default_download_dir} 到 {target_download_dir} 时出错: {e}")
     if Titletype == 0:
         pdf_filename = f"{jm_album_id}.pdf"
     elif Titletype == 1:
@@ -75,21 +62,11 @@ def get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=True, Titletype=2):
                 print(f"删除旧缓存 PDF 时出错 ({e}): {pdf_path}")
     if not use_cache:
         print(f"开始生成 PDF (加密={enable_pwd}): {pdf_path}")
-        webp_folder = str(target_download_dir) 
 
-        if not target_download_dir.exists():
-             if default_download_dir.exists():
-                 print(f"警告: 目标目录 {target_download_dir} 不存在，尝试从原始下载目录 {default_download_dir} 生成 PDF")
-                 webp_folder = str(default_download_dir)
-             else:
-                 print(f"错误: 图片目录 {target_download_dir} 和 {default_download_dir} 都不存在，无法生成 PDF")
-                 return None, None 
-
-
+        webp_floder = str(Path(opt.dir_rule.base_dir) / title)
         merge_webp_to_pdf(
-            webp_folder,
+            webp_floder,
             pdf_path=pdf_path,
-            is_pwd=enable_pwd,
             password=jm_album_id if enable_pwd else None
         )
         gc.collect() 
