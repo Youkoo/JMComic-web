@@ -3,8 +3,13 @@ from pathlib import Path
 from PIL import Image
 from PyPDF2 import PdfReader, PdfWriter
 
+# 将指定文件夹下的所有 .webp 文件按照文件名顺序合并为 PDF 长图，并可选加密。
+# @param folder_path: 包含 .webp 文件的文件夹路径
+# @param pdf_path: 输出文件夹
+# @param is_pwd: 是否加密 PDF 文件
 
-def merge_webp_to_pdf(folder_path, pdf_path, is_pwd=False, password=None):
+# @TR0MXI
+def merge_webp_to_pdf(folder_path, pdf_path, password=None):
     """
     将指定文件夹下的所有 .webp 文件按照文件名顺序合并为 PDF 长图，并可选加密。
 
@@ -37,7 +42,7 @@ def merge_webp_to_pdf(folder_path, pdf_path, is_pwd=False, password=None):
         page.compress_content_streams()
         pdf_writer.add_page(page)
 
-    if is_pwd and password:
+    if password:
         pdf_writer.encrypt(password)
         print(f"PDF 文件已加密：{pdf_path}")
 
