@@ -38,7 +38,7 @@ observer = Observer()
 observer.schedule(cfgFileChangeHandler(observer), path=optionFile, recursive=False) 
 observer.start()
 
-from flask import Flask, jsonify, request, send_file # 导入 request 和 send_file
+from flask import Flask, jsonify, request, send_file, redirect # 导入 request, send_file 和 redirect
 from waitress import serve
 
 from album_service import get_album_pdf_path
@@ -243,6 +243,13 @@ def get_album_details(jm_album_id):
         traceback.print_exc()
         return jsonify({"success": False, "message": f"An unexpected server error occurred: {e}"}), 500
 
+@app.route('/docs')
+def redirect_to_docs():
+    """
+    Redirects to the external API documentation.
+    """
+    return redirect("https://jm-api.apifox.cn")
+
 @app.route('/categories', methods=['GET'])
 def get_categories():
     page_num = request.args.get('page', 1, type=int)
@@ -308,6 +315,13 @@ def get_categories():
         print(f"Unexpected error in get_categories:")
         traceback.print_exc()
         return jsonify({"success": False, "message": f"An unexpected server error occurred: {e}"}), 500
+
+@app.route('/docs')
+def redirect_to_docs():
+    """
+    Redirects to the external API documentation.
+    """
+    return redirect("https://jm-api.apifox.cn")
 
 
 if __name__ == '__main__':
