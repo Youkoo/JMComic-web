@@ -35,8 +35,8 @@ def get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=True, Titletype=2):
         pdf_filename = f"{jm_album_id}.pdf"
     elif Titletype == 1:
         pdf_filename = f"{title}.pdf"
-    else: 
-        pdf_filename = f"{jm_album_id}—{title}.pdf"
+    else: # Default to TitleType 2 or any other value
+        pdf_filename = f"[{jm_album_id}] {title}.pdf"
 
     pdf_path_obj = Path(pdf_dir) / pdf_filename
     pdf_path = str(pdf_path_obj) 
