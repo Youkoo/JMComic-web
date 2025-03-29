@@ -20,7 +20,9 @@ def IsJmBookExist(path, jm_album_id):
     # 根据本子文件夹命名规则[id]title
     # 使用正则表达式匹配[id]来判断本子是否存在
     path = Path(path)
-    pattern = re.compile(rf"\[{jm_album_id}\]")
+    # 在构建正则前，去除 jm_album_id 的 "JM" 前缀（如果存在）
+    clean_id = jm_album_id.removeprefix("JM")
+    pattern = re.compile(rf"\[{clean_id}\]") # 使用处理后的 ID
     for item in path.iterdir():
         if item.is_dir() and pattern.match(item.name):
             # 如果是文件夹且符合规则，则返回title
