@@ -21,7 +21,8 @@ def merge_webp_to_pdf(folder_path, pdf_path, password=None):
     output_dir = Path(pdf_path).parent
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    webp_files = sorted(Path(folder_path).glob("*.webp"))
+    # Use rglob to search recursively for .webp files in subdirectories
+    webp_files = sorted(Path(folder_path).rglob("*.webp"))
 
     if not webp_files:
         raise FileNotFoundError(f"文件夹 {folder_path} 中没有找到 .webp 文件")
