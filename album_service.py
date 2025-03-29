@@ -14,7 +14,7 @@ def get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=True, Titletype=2):
     title = IsJmBookExist(opt.dir_rule.base_dir, jm_album_id)
     if title is None:   #本子不存在
         album, _ = download_album(jm_album_id, option=opt)
-        title = f"[{jm_album_id}]{album.name}"
+        title = f"{album.name}"
     else:
         print(f"本子已存在: {title}, 使用已缓存文件")
 
@@ -63,7 +63,7 @@ def get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=True, Titletype=2):
     if not use_cache:
         print(f"开始生成 PDF (加密={enable_pwd}): {pdf_path}")
 
-        webp_floder = str(Path(opt.dir_rule.base_dir) / title)
+        webp_floder = str(Path(opt.dir_rule.base_dir) / f"[{jm_album_id}]{title}")
         merge_webp_to_pdf(
             webp_floder,
             pdf_path=pdf_path,

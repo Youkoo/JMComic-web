@@ -24,5 +24,5 @@ def IsJmBookExist(path, jm_album_id):
     for item in path.iterdir():
         if item.is_dir() and pattern.match(item.name):
             # 如果是文件夹且符合规则，则返回title
-            return item.name
+            return item.name.split(']')[1].strip()
     return None
