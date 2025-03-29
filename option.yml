@@ -10,3 +10,9 @@ log: true
 #       kwargs:
 #         pdf_dir: ./pdf
 #         filename_rule: Aname  # pdf命名规则，A代表album, name代表使用album.name也就是本子名称
+# plugins:
+#  after_init:
+#    - plugin: login # 登录插件
+#      kwargs:
+#        username: ** # 用户名
+#        password: ** # 密码
