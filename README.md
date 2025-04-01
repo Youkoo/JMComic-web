@@ -2,6 +2,12 @@
 
 本仓库基于 [LingLambda/JMComic-Api](https://github.com/LingLambda/JMComic-Api) 修改，提供一个用于与禁漫天堂（JMComic）交互的 Web API 服务。
 
+## 注意
+
+本项目主要使用 jmcomic 移动端API。对IP要求相对较低。但是由于实现原因，**性能开销**会比较大。
+
+### 更加推荐使用 [jmcomic-api:develop](https://github.com/FfmpegZZZ/JMComic-Api/tree/develop) 性能开销更低，但是使用了网页的API，IP风控会更加严格。
+
 ## 使用方法
 
 你可以选择直接运行源代码或使用 Docker 镜像。
