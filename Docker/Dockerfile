@@ -1,8 +1,8 @@
 # 使用官方的 Python 3 Alpine 镜像作为基础镜像
 FROM python:3-slim
 
-# 更新包列表并安装 Git（Alpine 使用 apk 包管理）
-RUN apk update && apk add --no-cache git
+# 更新包列表并安装 Git（Debian 使用 apt-get 包管理）
+RUN apt-get update && apt-get install -y --no-install-recommends git
 
 # 设置工作目录
 WORKDIR /app
@@ -20,7 +20,8 @@ WORKDIR /app/JMComic-Api
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 删除 Git 包，减小镜像体积
-RUN apk del git
+# 删除 Git 包，减小镜像体积
+RUN apt-get purge -y --auto-remove git
 
 # 设置容器启动时运行的命令（假设是 main.py）
 CMD ["python", "main.py"]
