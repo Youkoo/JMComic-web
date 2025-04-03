@@ -1,10 +1,9 @@
 import gc
 from pathlib import Path
 import os
+import fitz  # PyMuPDF
 
 from jmcomic import download_album
-from PyPDF2 import PdfReader
-from PyPDF2.errors import DependencyError, FileNotDecryptedError 
 
 # 调用utils中封装的工具函数
 from utils.pdf import merge_webp_to_pdf
@@ -31,29 +30,30 @@ def get_album_pdf_path(jm_album_id, pdf_dir, opt, enable_pwd=True, Titletype=2):
     use_cache = False
     if pdf_path_obj.exists():
         try:
-            reader = PdfReader(pdf_path)
+            doc = fitz.open(pdf_path)
             if enable_pwd:
-                if reader.is_encrypted:
-                    try:
-                        if reader.decrypt(jm_album_id): 
-                            print(f"缓存 PDF 已使用 '{jm_album_id}' 成功解密，使用缓存: {pdf_path}")
-                            use_cache = True
-                        else:
-                             print(f"缓存 PDF 使用 '{jm_album_id}' 解密失败 (decrypt returned false)，重新生成: {pdf_path}")
-                    except (FileNotDecryptedError, DependencyError, NotImplementedError) as decrypt_error:
-                        print(f"缓存 PDF 使用 '{jm_album_id}' 解密失败 ({decrypt_error})，重新生成: {pdf_path}")
+                if doc.is_encrypted:
+                    # 尝试用 jm_album_id 解密
+                    if doc.authenticate(jm_album_id):
+                        print(f"缓存 PDF 已使用 '{jm_album_id}' 成功解密，使用缓存: {pdf_path}")
+                        use_cache = True
+                    else:
+                        print(f"缓存 PDF 使用 '{jm_album_id}' 解密失败，重新生成: {pdf_path}")
                 else:
+                    # 缓存未加密，但请求需要加密
                     print(f"缓存 PDF 未加密，但请求需要加密，重新生成: {pdf_path}")
             else:
-                if not reader.is_encrypted:
+                # 请求不需要加密
+                if not doc.is_encrypted:
                     print(f"缓存 PDF 未加密，符合请求，使用缓存: {pdf_path}")
                     use_cache = True
                 else:
+                    # 缓存已加密，但请求不需要加密
                     print(f"缓存 PDF 已加密，但请求不需要加密，重新生成: {pdf_path}")
-
+            doc.close() # 关闭文档
         except Exception as e:
-            print(f"检查缓存 PDF 时出错 ({e})，将重新生成: {pdf_path}")
-            use_cache = False 
+            print(f"检查缓存 PDF 时出错 ({type(e).__name__}: {e})，将重新生成: {pdf_path}")
+            use_cache = False
 
         if not use_cache:
             try:
