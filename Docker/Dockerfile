@@ -1,8 +1,10 @@
 # 使用官方的 Python 3 Alpine 镜像作为基础镜像
 FROM python:3-slim
 
-# 更新包列表并安装 Git（Debian 使用 apt-get 包管理）
-RUN apt-get update && apt-get install -y --no-install-recommends git
+# 更新包列表、安装 Git 并清理缓存（Debian 使用 apt-get 包管理）
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/*
 
 # 设置工作目录
 WORKDIR /app
