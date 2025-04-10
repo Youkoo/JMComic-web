@@ -13,7 +13,7 @@ WORKDIR /app
 # COPY . /app
 
 # 克隆指定的 Git 仓库
-RUN git clone https://github.com/FfmpegZZZ/JMComic-Api
+RUN git clone https://github.com/Youkoo/JMComic-web.git
 
 # 进入克隆的目录
 WORKDIR /app/JMComic-Api

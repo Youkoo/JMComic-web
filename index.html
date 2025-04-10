@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫画搜索</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        #searchInput {
+            flex: 1;
+            padding: 8px;
+            font-size: 16px;
+        }
+        #searchButton {
+            padding: 8px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .comic-list {
+            display: grid;
+            gap: 15px;
+        }
+        .comic-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .comic-title {
+            flex: 1;
+            margin-right: 15px;
+        }
+        .get-pdf-btn {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .get-pdf-btn:hover {
+            background-color: #45a049;
+        }
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .pagination button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>漫画搜索</h1>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="输入关键词搜索...">
+        <button id="searchButton">搜索</button>
+    </div>
+    <div class="loading" id="loading">加载中...</div>
+    <div class="comic-list" id="comicList"></div>
+    <div class="pagination" id="pagination">
+        <button id="prevPage" style="display: none">上一页</button>
+        <button id="nextPage" style="display: none">下一页</button>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const API_BASE_URL = 'http://localhost:8699'; // 根据实际情况修改
+
+        async function searchComics(query, page = 1) {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                const response = await fetch(`${API_BASE_URL}/search?query=${encodeURIComponent(query)}&page=${page}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data.data);
+                } else {
+                    alert('搜索失败: ' + data.message);
+                }
+            } catch (error) {
+                alert('请求出错: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            const comicList = document.getElementById('comicList');
+            comicList.innerHTML = '';
+
+            data.results.forEach(comic => {
+                const comicItem = document.createElement('div');
+                comicItem.className = 'comic-item';
+                
+                const title = document.createElement('div');
+                title.className = 'comic-title';
+                title.textContent = comic.title;
+                
+                const getPdfBtn = document.createElement('button');
+                getPdfBtn.className = 'get-pdf-btn';
+                getPdfBtn.textContent = '获取PDF';
+                getPdfBtn.onclick = () => getPdf(comic.id);
+                
+                comicItem.appendChild(title);
+                comicItem.appendChild(getPdfBtn);
+                comicList.appendChild(comicItem);
+            });
+
+            // 更新分页按钮
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            
+            prevBtn.style.display = currentPage > 1 ? 'block' : 'none';
+            nextBtn.style.display = data.has_next_page ? 'block' : 'none';
+        }
+
+        async function getPdf(id) {
+            try {
+                window.open(`${API_BASE_URL}/get_pdf/${id}?pdf=true`, '_blank');
+            } catch (error) {
+                alert('获取PDF失败: ' + error.message);
+            }
+        }
+
+        // 事件监听器
+        document.getElementById('searchButton').onclick = () => {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                currentPage = 1;
+                searchComics(query, currentPage);
+            }
+        }
+
+        document.getElementById('searchInput').onkeypress = (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (query) {
+                    currentPage = 1;
+                    searchComics(query, currentPage);
+                }
+            }
+        }
+
+        document.getElementById('prevPage').onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                const query = document.getElementById('searchInput').value.trim();
+                searchComics(query, currentPage);
+            }
+        }
+
+        document.getElementById('nextPage').onclick = () => {
+            currentPage++;
+            const query = document.getElementById('searchInput').value.trim();
+            searchComics(query, currentPage);
+        }
+    </script>
+</body>
+</html>
